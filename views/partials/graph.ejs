@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Sales Trends</title>
+  <style>
+    .chart-container {
+      width: 1500px;
+      height: 600px; /* Adjusted height for better visualization */
+      border: 1px solid white;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap; /* Added flex-wrap for responsive layout */
+    }
+
+    .chart {
+      width: 400px;
+      height: 400px;
+      margin-bottom: 20px; /* Added margin for spacing between charts */
+    }
+
+    canvas {
+      image-rendering: auto; /* Adjust the image rendering */
+    }
+  </style>
+</head>
+<body>
+  <img src="banner.jpg" alt="Banner Image" class="banner-img">
+
+  <div class="chart-container">
+    <div class="chart">
+      <canvas id="circleChart" width="400" height="400"></canvas>
+    </div>
+    <div class="chart">
+      <canvas id="lineChart" width="400" height="400"></canvas>
+    </div>
+    <div class="chart">
+      <canvas id="barChart" width="400" height="400"></canvas>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let lineChart;
+    let circleChart;
+    let barChart;
+
+    // Function to create the initial line chart
+    function createLineChart() {
+      const canvas = document.getElementById('lineChart');
+      const ctx = canvas.getContext('2d');
+
+      const electronicsCount = <%= categoryCounts.electronics || 0 %>; // Category count for electronics
+      const furnitureCount = <%= categoryCounts.furniture || 0 %>; // Category count for furniture
+      const medicineCount = <%= categoryCounts.medicine || 0 %>; // Category count for medicine
+      const fashionCount = <%= categoryCounts.fashion || 0 %>; // Category count for fashion
+      const booksCount = <%= categoryCounts.books || 0 %>; // Category count for books
+      const sportsCount = <%= categoryCounts.sports || 0 %>; // Category count for sports
+
+      const chartData = {
+        labels: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        datasets: [
+          {
+            label: `Electronics`,
+            data: [0, electronicsCount, electronicsCount, electronicsCount, electronicsCount, electronicsCount, electronicsCount],
+            borderColor: '#000',
+            backgroundColor: '#00FF00', // Green
+            tension: 0.4
+          },
+          {
+            label: `Furniture`,
+            data: [0, furnitureCount, furnitureCount, furnitureCount, furnitureCount, furnitureCount, furnitureCount],
+            borderColor: '#000',
+            backgroundColor: '#FFFF00', // Yellow
+            tension: 0.4
+          },
+          {
+            label: `Medicine`,
+            data: [0, medicineCount, medicineCount, medicineCount, medicineCount, medicineCount, medicineCount],
+            borderColor: '#000',
+            backgroundColor: '#FF0000', // Red
+            tension: 0.4
+          },
+          {
+            label: `Fashion`,
+            data: [0, fashionCount, fashionCount, fashionCount, fashionCount, fashionCount, fashionCount],
+            borderColor: '#000',
+            backgroundColor: '#0000FF', // Blue
+            tension: 0.4
+          },
+          {
+            label: `Books`,
+            data: [0, booksCount, booksCount, booksCount, booksCount, booksCount, booksCount],
+            borderColor: '#000',
+            backgroundColor: '#FF00FF', // Purple
+            tension: 0.4
+          },
+          {
+            label: `Sports`,
+            data: [0, sportsCount, sportsCount, sportsCount, sportsCount, sportsCount, sportsCount],
+            borderColor: '#000',
+            backgroundColor: '#FFA500', // Orange
+            tension: 0.4
+          }
+        ]
+      };
+
+      const options = {
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Days'
+            }
+          },
+          y: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Sales'
+            }
+          }
+        },
+        onClick: function(event) {
+          const activePoints = lineChart.getElementsAtEvent(event);
+          if (activePoints.length > 0) {
+            const clickedDatasetIndex = activePoints[0].datasetIndex;
+            const clickedIndex = activePoints[0].index;
+            const datasetLabel = lineChart.data.datasets[clickedDatasetIndex].label;
+            const value = lineChart.data.datasets[clickedDatasetIndex].data[clickedIndex];
+            alert(`Product: ${datasetLabel}\nCount: ${value}`);
+          }
+        }
+      };
+
+      lineChart = new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: options
+      });
+    }
+
+    // Function to create the circle chart
+    function createCircleChart() {
+      const canvas = document.getElementById('circleChart');
+      const ctx = canvas.getContext('2d');
+      
+      const electronicsCount = <%= categoryCounts.electronics || 0 %>; // Category count for electronics
+      const furnitureCount = <%= categoryCounts.furniture || 0 %>; // Category count for furniture
+      const medicineCount = <%= categoryCounts.medicine || 0 %>; // Category count for medicine
+      const fashionCount = <%= categoryCounts.fashion || 0 %>; // Category count for fashion
+      const booksCount = <%= categoryCounts.books || 0 %>; // Category count for books
+      const sportsCount = <%= categoryCounts.sports || 0 %>; // Category count for sports
+
+      const chartData = {
+        labels: ['Electronics', 'Furniture', 'Medicine', 'Fashion', 'Books', 'Sports'],
+        datasets: [
+          {
+            label: 'Avalibale',
+            data: [electronicsCount, furnitureCount, medicineCount, fashionCount, booksCount, sportsCount],
+            backgroundColor: ['#00FF00', '#FFFF00', '#FF0000', '#0000FF', '#FF00FF', '#FFA500'] // Green, Yellow, Red, Blue, Purple, Orange
+          }
+        ]
+      };
+
+      const options = {
+        responsive: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          }
+        },
+        onClick: function(event) {
+          const clickedSegment = circleChart.getElementsAtEvent(event)[0];
+          if (clickedSegment) {
+            const segmentLabel = circleChart.data.labels[clickedSegment.index];
+            const value = circleChart.data.datasets[0].data[clickedSegment.index];
+            alert(`Product: ${segmentLabel}\nCount: ${value}`);
+          }
+        }
+      };
+
+      circleChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: options
+      });
+    }
+
+    // Function to create the bar chart
+    function createBarChart() {
+      const canvas = document.getElementById('barChart');
+      const ctx = canvas.getContext('2d');
+
+      const electronicsCount = <%= categoryCounts.electronics || 0 %>; // Category count for electronics
+      const furnitureCount = <%= categoryCounts.furniture || 0 %>; // Category count for furniture
+      const medicineCount = <%= categoryCounts.medicine || 0 %>; // Category count for medicine
+      const fashionCount = <%= categoryCounts.fashion || 0 %>; // Category count for fashion
+      const booksCount = <%= categoryCounts.books || 0 %>; // Category count for books
+      const sportsCount = <%= categoryCounts.sports || 0 %>; // Category count for sports
+
+      const chartData = {
+        labels: ['Electronics', 'Furniture', 'Medicine', 'Fashion', 'Books', 'Sports'],
+        datasets: [
+          {
+            label: 'Avalibale',
+            data: [electronicsCount, furnitureCount, medicineCount, fashionCount, booksCount, sportsCount],
+            backgroundColor: ['#00FF00', '#FFFF00', '#FF0000', '#0000FF', '#FF00FF', '#FFA500'] // Green, Yellow, Red, Blue, Purple, Orange
+          }
+        ]
+      };
+
+      const options = {
+        scales: {
+          x: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Products'
+            }
+          },
+          y: {
+            display: true,
+            title: {
+              display: true,
+              text: 'Avalibale'
+            }
+          }
+        },
+        onClick: function(event) {
+          const activePoints = barChart.getElementsAtEvent(event);
+          if (activePoints.length > 0) {
+            const clickedIndex = activePoints[0].index;
+            const segmentLabel = chartData.labels[clickedIndex];
+            const value = chartData.datasets[0].data[clickedIndex];
+            alert(`Product: ${segmentLabel}\nCount: ${value}`);
+          }
+        }
+      };
+
+      barChart = new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: options
+      });
+    }
+
+    // Call the function to create the initial charts
+    createLineChart();
+    createCircleChart();
+    createBarChart();
+  </script>
+</body>
+</html>
